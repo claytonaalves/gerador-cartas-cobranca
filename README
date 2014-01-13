@@ -1,0 +1,19 @@
+Clayton,
+ 
+Segue em anexo o layout da carta de cobranÃ§a. Coloquei em vermelho tudo que tem que ser puxado banco de dados do 
+vigo a logo da empresa tambÃ©m. No terceiro parÃ¡grafo, coloco ali o dia que o sinal serÃ¡ cortado esta em azul 
+para vocÃª localizar, aquela data ali coloco manualmente toda vez que vou gerar a carta, coloco sempre a 
+data do corte 7 dias apÃ³s a emissÃ£o da carta.
+ 
+Os filtros para gerar a carta seria o seguinte:
+- seriam por situação de cliente, ativos, bloqueados ou desativados
+- filtrar por período de cliente com boletos em aberto (filtrar da data inicial a data final)
+- opção de filtro de cliente com apenas 01 boleto em aberto
+- opção de filtro com um ou mais boletos em aberto
+ 
+ 
+Preciso fazer carta hoje da empresa 02. Poderia gerar as cartas ai pra mim, seria de clientes ativos 
+com um ou mais boletos em aberto do dia 01/01/1900 atÃ© o dia 25/10/2013.
+ 
+Att.
+Nilton Junior
