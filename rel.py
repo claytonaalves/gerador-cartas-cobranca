@@ -1,14 +1,17 @@
 import MySQLdb
-from datetime import datetime
+import datetime
 from string import Template
 from pdb import set_trace
 from pprint import pprint
 
 IDEMPRESA = '1'
+atraso = datetime.timedelta(days=15)
+vcto_inicial = '1900-01-01'
+vcto_final   = (datetime.datetime.now()-atraso).strftime('%Y-%m-%d')
+taxa_religamento = '10,00'
 
 # Rio Cable/Som Sat
 conn = MySQLdb.connect('127.0.0.1', 'claytontemp', 'nonono', 'vigo')
-
 q = conn.cursor()
 
 q.execute('select fantasia, cidade, uf from empresas where id=%s' % IDEMPRESA)
@@ -17,25 +20,23 @@ fantasia, cidade_emp, uf = q.fetchone()
 cidade_emp = "%s - %s" % (cidade_emp, uf)
 
 query = """\
-select
-    u.numero,
-    nnumero,
-    b.vcto,
-    valor,
-    b.nome,
-    b.cidade,
-    b.endereco,
-    u.bairro,
-    u.telefone
-from boletos b
-left join usuarios u using(numero)
-where 
-    u.idempresa=%s and
-    u.situacao='' and
-    b.pago='0' and
-    b.vcto between '1900-01-01' and '2013-12-29'
-order by u.nome;
-""" % IDEMPRESA
+select bol.nnumero, bol.vcto, bol.valor, bol.nome, bol.cidade, bol.endereco, t1.numero, t1.bairro, t1.telefone from 
+	(select distinct
+		u.numero,
+		u.bairro,
+		u.telefone
+	from boletos b
+	left join usuarios u using(numero)
+	where 
+		u.idempresa=%s and
+		u.situacao='' and
+		b.pago='0' and
+		b.vcto between '%s' and '%s'
+	order by u.nome) t1
+left join boletos bol on t1.numero=bol.numero
+where bol.pago='0' and bol.vcto<curdate()
+order by nome, vcto
+""" % (IDEMPRESA, vcto_inicial, vcto_final)
 
 base = open('base.html', 'r')
 base_template = base.read().decode('utf8')
@@ -51,7 +52,7 @@ class Cliente:
 
 clientes = {}
 
-for numero, nnumero, vcto, valor, nome, cidade, endereco, bairro, telefone in q:
+for nnumero, vcto, valor, nome, cidade, endereco, numero, bairro, telefone in q:
     vencimento = vcto.strftime('%d/%m/%Y')
     valor = str(valor).replace('.', ',')
 
@@ -99,7 +100,7 @@ for numero, cliente in clientes.iteritems():
     saida = s.substitute(
         nome_empresa = fantasia,
         cidade       = cidade,
-        data         = datetime.now().strftime('%d/%m/%Y'),
+        data         = datetime.datetime.now().strftime('%d/%m/%Y'),
         nome_cliente = nome_cliente,
         contrato = str(cliente.numero).zfill(5),
         endereco = endereco,
@@ -107,6 +108,7 @@ for numero, cliente in clientes.iteritems():
         telefone = cliente.telefone,
         telefone_empresa='3261-3098',
         logofile='logo%s.jpg' % IDEMPRESA,
+        taxa_religamento=taxa_religamento,
         lista_boletos=''.join(boletos))
     cartas.append(saida)
 
