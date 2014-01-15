@@ -1,3 +1,4 @@
+#coding: utf8
 import MySQLdb
 import datetime
 from string import Template
@@ -14,9 +15,10 @@ taxa_religamento = '10,00'
 conn = MySQLdb.connect('127.0.0.1', 'claytontemp', 'nonono', 'vigo')
 q = conn.cursor()
 
-q.execute('select fantasia, cidade, uf from empresas where id=%s' % IDEMPRESA)
+# Obtém os dados da empresa
+q.execute('select fantasia, cidade, uf, telefone from empresas where id=%s' % IDEMPRESA)
 
-fantasia, cidade_emp, uf = q.fetchone()
+fantasia, cidade_emp, uf, telefone_empresa = q.fetchone()
 cidade_emp = "%s - %s" % (cidade_emp, uf)
 
 query = """\
@@ -106,7 +108,7 @@ for numero, cliente in clientes.iteritems():
         endereco = endereco,
         bairro = cliente.bairro,
         telefone = cliente.telefone,
-        telefone_empresa='3261-3098',
+        telefone_empresa=telefone_empresa,
         logofile='logo%s.jpg' % IDEMPRESA,
         taxa_religamento=taxa_religamento,
         lista_boletos=''.join(boletos))
