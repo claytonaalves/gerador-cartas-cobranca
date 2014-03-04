@@ -2,7 +2,6 @@
 import MySQLdb
 import datetime
 from string import Template
-from pdb import set_trace
 from pprint import pprint
 
 IDEMPRESA = '1'
@@ -22,11 +21,13 @@ fantasia, cidade_emp, uf, telefone_empresa = q.fetchone()
 cidade_emp = "%s - %s" % (cidade_emp, uf)
 
 query = """\
-select bol.nnumero, bol.vcto, bol.valor, bol.nome, bol.cidade, bol.endereco, t1.numero, t1.bairro, t1.telefone from 
+select bol.nnumero, bol.vcto, bol.valor, bol.nome, t1.cidade, t1.endereco, t1.numero, t1.bairro, t1.telefone from 
 	(select distinct
 		u.numero,
 		u.bairro,
-		u.telefone
+		u.telefone,
+        u.endereco,
+        u.cidade
 	from boletos b
 	left join usuarios u using(numero)
 	where 
@@ -86,13 +87,10 @@ for numero, cliente in clientes.iteritems():
 
     boletos = []
     for boleto in cliente.boletos:
-        #set_trace()
         boletos.append(boletos_tpl.substitute(
             nnumero    = boleto[0],
             vencimento = boleto[1],
             valor      = boleto[2]))
-
-    
 
     fantasia = fantasia.decode('latin1')
     cidade   = cidade_emp.decode('latin1')
@@ -109,7 +107,7 @@ for numero, cliente in clientes.iteritems():
         bairro = cliente.bairro,
         telefone = cliente.telefone,
         telefone_empresa=telefone_empresa,
-        logofile='logo%s.jpg' % IDEMPRESA,
+        logofile='logo_empresa_%s.jpg' % IDEMPRESA,
         taxa_religamento=taxa_religamento,
         lista_boletos=''.join(boletos))
     cartas.append(saida)
