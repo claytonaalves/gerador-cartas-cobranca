@@ -66,3 +66,43 @@ clientes ativos
 com 01 ou mais boletos em aberto até o dia 02/02/2014
 aquela data do corte la dentro coloca dia 25/02/2014
 aqui, nas ultimas cartas, estava saindo com a logo SISTEL, coloca pra puxar a logo que ta la no vigo da Rio Cable
+
+==========================================
+
+select 
+   t1.numero,
+   (datediff(curdate(), bol.vcto)) as dias_atraso,
+   bol.nnumero, 
+   bol.vcto, 
+   bol.valor, 
+   bol.nome, 
+   t1.cidade, 
+   t1.endereco, 
+   t1.numero, 
+   t1.bairro, 
+   t1.telefone
+from boletos bol
+left join 
+    (   select
+            u.numero,
+            u.bairro,
+            u.telefone,
+            u.endereco,
+            u.cidade,
+            count(*) as titulos_abertos
+        from boletos b
+        left join usuarios u using(numero)
+        where 
+            u.idempresa=1 and
+            u.situacao in ('') and
+            b.pago='0' and
+            b.vcto between '2014-01-01' and '2014-02-28'
+        group by (u.numero)
+        order by u.nome 
+    ) t1 on t1.numero=bol.numero
+where 
+    bol.pago='0' 
+    and ((datediff(curdate(), bol.vcto)) between 60 and 90)
+    and (t1.titulos_abertos between 1 and 3)
+order by bol.numero, bol.vcto
+
