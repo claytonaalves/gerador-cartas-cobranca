@@ -2,6 +2,7 @@
 import datetime
 from string import Template
 from database import *
+from collections import OrderedDict
 
 TAXA_RELIGAMENTO = '10,00'
 
@@ -18,7 +19,7 @@ def gerar(idempresa):
 
     template = open('template.html', 'r').read().decode('utf8')
 
-    clientes = {}
+    clientes = OrderedDict()
 
     for titulo in empresa.titulos_atrasados():
         if titulo.numero in clientes:
@@ -53,6 +54,8 @@ def gerar(idempresa):
                 vencimento = titulo.vcto,
                 valor      = titulo.valor))
 
+        print numero, cliente.nome
+
         saida = s.substitute(
             nome_empresa     = empresa.fantasia,
             cidade           = empresa.cidade,
@@ -75,3 +78,6 @@ def gerar(idempresa):
     f = open('output.html', 'w')
     f.write(output.encode('utf8'))
     f.close()
+
+if __name__=='__main__':
+    gerar(1)
