@@ -29,7 +29,7 @@ class Empresa:
         vcto2     = '2014-03-31'
         atraso1   = 10
         atraso2   = 150
-        titulos1  = 1
+        titulos1  = 2
         titulos2  = 5
 
         query = ( "select                                                                        "
@@ -65,7 +65,7 @@ class Empresa:
                   "    bol.pago='0'                                                              "
                   "    and ((datediff(curdate(), bol.vcto)) between %(atraso1)d and %(atraso2)d) "
                   "    and (t1.titulos_abertos between %(titulos1)d and %(titulos2)d)            "
-                  "order by bol.numero, bol.vcto                                                 " )
+                  "order by bol.nome, bol.vcto                                                   " )
         query = query % (locals())
 
         cursor.execute(query)
@@ -86,4 +86,10 @@ class Empresa:
 
             yield titulo
 
+def test():
+    empresa = Empresa(1)
+    for r in empresa.titulos_atrasados():
+        print r.numero, r.nome, r.nnumero
 
+if __name__=='__main__':
+    test()
