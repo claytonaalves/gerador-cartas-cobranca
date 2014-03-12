@@ -75,8 +75,8 @@ class Empresa:
 
             titulo          = Titulo()
             titulo.nnumero  = nnumero
-            titulo.vcto     = vcto.strftime('%d/%m/%Y')
-            titulo.valor    = str(valor).replace('.', ',')
+            titulo.vcto     = vcto
+            titulo.valor    = valor
             titulo.nome     = nome.decode('latin1')
             titulo.numero   = numero
             titulo.cidade   = cidade.decode('latin1')
