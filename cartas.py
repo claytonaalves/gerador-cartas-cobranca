@@ -1,6 +1,7 @@
 import os
 import subprocess
 import datetime
+import tempfile
 from string import Template
 
 path = os.path.abspath(__file__)
@@ -57,16 +58,14 @@ class CartasCobranca:
 
         output = base_template.replace('%{body}s', final)
 
-        f = open('output.html', 'w')
+        # create a temporary file to store the .html
+        f = tempfile.NamedTemporaryFile(mode='w', suffix='.html')
         f.write(output.encode('utf8'))
-        f.close()
+        f.flush()
 
-        self._geraPDF()
-
-    def _geraPDF(self):
-        """ Gera o arquivo .pdf a partir do .html
-        """
+        # generate .pdf file
         FNULL = open(os.devnull, 'w')
-        retcode = subprocess.call(["wkhtmltopdf-amd64", "-q", "output.html", "output.pdf"], stdout=FNULL, stderr=FNULL)
-        
+        retcode = subprocess.call(["wkhtmltopdf-amd64", "-q", f.name, "output.pdf"], stdout=FNULL, stderr=FNULL)
+
+        f.close()
 
