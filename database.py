@@ -22,16 +22,8 @@ class Empresa:
         self.uf        = uf
         self.telefone  = telefone_empresa
 
-    def titulos_atrasados(self):
-        idempresa = 1
-        situacao  = "''"
-        vcto1     = '2014-01-01'
-        vcto2     = '2014-03-31'
-        atraso1   = 10
-        atraso2   = 150
-        titulos1  = 2
-        titulos2  = 5
-
+    def titulos_atrasados(self, **kwargs):
+        kwargs['idempresa'] = self.idempresa
         query = ( "select                                                                        "
                   "   bol.nnumero,                                                               "
                   "   bol.vcto,                                                                  "
@@ -66,7 +58,7 @@ class Empresa:
                   "    and ((datediff(curdate(), bol.vcto)) between %(atraso1)d and %(atraso2)d) "
                   "    and (t1.titulos_abertos between %(titulos1)d and %(titulos2)d)            "
                   "order by bol.nome, bol.vcto                                                   " )
-        query = query % (locals())
+        query = query % (kwargs)
 
         cursor.execute(query)
 
@@ -88,7 +80,16 @@ class Empresa:
 
 def test():
     empresa = Empresa(1)
-    for r in empresa.titulos_atrasados():
+    titulos = empresa.titulos_atrasados(
+              situacao = "''",
+              vcto1    = '2014-01-01',
+              vcto2    = '2014-03-31',
+              atraso1  = 10,
+              atraso2  = 150,
+              titulos1 = 2,
+              titulos2 = 5)
+
+    for r in titulos:
         print r.numero, r.nome, r.nnumero
 
 if __name__=='__main__':

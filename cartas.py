@@ -67,5 +67,7 @@ class CartasCobranca:
         FNULL = open(os.devnull, 'w')
         retcode = subprocess.call(["wkhtmltopdf-amd64", "-q", f.name, "output.pdf"], stdout=FNULL, stderr=FNULL)
 
+        # TODO: gravar o .pdf em um arquivo temporario e retornar o nome do arquivo
+
         f.close()
 
