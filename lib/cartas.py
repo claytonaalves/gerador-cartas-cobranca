@@ -1,3 +1,4 @@
+#coding: utf8
 import os
 import subprocess
 import datetime
@@ -7,17 +8,16 @@ from string import Template
 path = os.path.abspath(__file__)
 dir_path = os.path.dirname(path)
 
-TAXA_RELIGAMENTO = 1.1
-PAGAR_ATE        = datetime.datetime.now()+datetime.timedelta(days=15)
-DATA_BLOQUEIO    = datetime.datetime.now()+datetime.timedelta(days=20)
-
 class CartasCobranca:
 
-    def __init__(self, empresa):
+    def __init__(self, config):
         self.cartas = []
-        self.empresa = empresa
+        self.config = config
+        self.empresa = config['empresa']
 
     def append(self, cliente):
+        """ Adiciona uma carta a coleção de cartas.
+        """
         template = open('%s/template.html' % dir_path, 'r').read().decode('utf8')
         s = Template(template)
 
@@ -41,14 +41,15 @@ class CartasCobranca:
             telefone         = cliente.telefone,
             telefone_empresa = self.empresa.telefone,
             logofile         = '%s/logo_empresa_%s.jpg' % (dir_path, self.empresa.idempresa),
-            taxa_religamento = TAXA_RELIGAMENTO,
+            taxa_religamento = self.config['taxa_religamento'],
             lista_boletos    = '\n'.join(titulos),
-            pagar_ate        = PAGAR_ATE.strftime('%d/%m/%Y'),
-            data_bloqueio    = DATA_BLOQUEIO.strftime('%d/%m/%Y'))
+            pagar_ate        = self.config['pagar_ate'].strftime('%d/%m/%Y'),
+            data_bloqueio    = self.config['data_bloqueio'].strftime('%d/%m/%Y'))
         self.cartas.append(saida)
 
     def gerar(self):
-        """ Retornar nome do arquivo .pdf para iniciar download
+        """ Gera as cartas em .html e depois as processa para obter o .pdf
+            Retorna o nome do arquivo .pdf para iniciar download
         """
         base = open('%s/base.html' % dir_path, 'r')
         base_template = base.read().decode('utf8')
@@ -59,7 +60,8 @@ class CartasCobranca:
         output = base_template.replace('%{body}s', final)
 
         # create a temporary file to store the .html
-        f = tempfile.NamedTemporaryFile(mode='w', suffix='.html')
+        #f = tempfile.NamedTemporaryFile(mode='w', suffix='.html')
+        f = open('output.html', 'w')
         f.write(output.encode('utf8'))
         f.flush()
 
@@ -70,4 +72,42 @@ class CartasCobranca:
         # TODO: gravar o .pdf em um arquivo temporario e retornar o nome do arquivo
 
         f.close()
+
+def test():
+    from collections import namedtuple
+    empresa = namedtuple('Empresa', 'idempresa, fantasia, cidade, telefone')
+    cliente = namedtuple('Cliente', 'numero, nome, endereco, bairro, telefone, boletos')
+
+    config = {
+        'empresa'          : empresa,
+        'taxa_religamento' : 10.2,
+        'pagar_ate'        : datetime.datetime.now()+datetime.timedelta(days=15),
+        'data_bloqueio'    : datetime.datetime.now()+datetime.timedelta(days=20)
+    }
+
+    empresa.idempresa = 1
+    empresa.fantasia = 'Clayton Co'
+    empresa.cidade = 'Alta Floresta - MT'
+    empresa.telefone = '3333-3333'
+    cartas = CartasCobranca(config)
+
+    # Cria um cliente com um titulo
+    cliente.numero = 1234
+    cliente.nome = 'Clayton de Almeida Alves'
+    cliente.endereco = 'Rua das flores'
+    cliente.bairro = 'Centro'
+    cliente.telefone = '1234-4321'
+    cliente.boletos = []
+
+    titulo = namedtuple('Titulo', 'nnumero, vencimento, valor')
+    titulo.nnumero = '00000000001-1'
+    titulo.vencimento = datetime.datetime.now()
+    titulo.valor = 42.42
+    cliente.boletos.append(titulo)
+    cartas.append(cliente)
+
+    cartas.gerar()
+
+if __name__=="__main__":
+    test()
 
