@@ -29,7 +29,7 @@
     width: 100%;
     font-size: 11px;
     font-family: Arial, sans-serif;
-    margin-bottom: 10px;
+    margin-bottom: 30px;
 ">
     <colgroup>
         <col width="88">
@@ -107,13 +107,12 @@
 
 <p><b>Boleto(s) em aberto no sistema:</b></p>
 
+<div style="height: 90px; max-height: 90px; margin-bottom: 20px;">
 <pre>
 NOSSO NÚMERO   VENCIMENTO VALOR
 $lista_boletos
 </pre>
-
-<p class="center">Atenciosamente,<br>
-<font face="Arial, sans-serif"><font size="2">$nome_empresa</font></font></p>
+</div>
 
 <p class="center">Atenciosamente,<br>
 <font face="Arial, sans-serif"><font size="2">$nome_empresa</font></font></p>
@@ -151,7 +150,7 @@ $lista_boletos
     </tbody>
 </table>
 
-<p align="CENTER">- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -</p>
+<div style="border-bottom: 1px dashed; margin-top: 30px;"></div>
 
 <p align="CENTER">
     <font face="Arial, sans-serif">
@@ -164,10 +163,13 @@ $lista_boletos
 <p align="JUSTIFY">
 <font face="Arial, sans-serif"><font size="2" style="font-size: 11pt">Declaro ter recebido a solicitação de comparecimento à $nome_empresa, com a finalidade de regularizar situação pendente.</font></font></p>
 
-<p> ______/______/______ &nbsp;&nbsp;&nbsp;&nbsp;________________________________________ </p>
+<div style="float:left;">______/______/______</div>
+<div style="float:right;">
+    ________________________________________
+    <div style="text-align: center;">Assinatura Legível</div>
+</div>
 
-<p align="CENTER">
-<font face="Arial, sans-serif"><font size="2">Assinatura Legível</font></font></p>
+<div style="clear: both;"></div>
 
 <div class="breakhere">
 </div>
