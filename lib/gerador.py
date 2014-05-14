@@ -1,6 +1,6 @@
 #coding: utf8
+import datetime
 from database import *
-from collections import OrderedDict
 from cartas import CartasCobranca
 from itertools import groupby
 from collections import namedtuple
@@ -16,11 +16,20 @@ def gerar(idempresa, **kwargs):
         * atraso2  : quantidade de dias em atraso (inteiro)
         * titulos1 : número de títulos em atraso (inteiro)
         * titulos2 : número de títulos em atraso (inteiro)
+        * taxa_religamento
+        * pagar_ate
+        * data_bloqueio
     """
     empresa  = Empresa(idempresa)
-    cartas = CartasCobranca(empresa)
+    config = {
+        'empresa': empresa,
+        'taxa_religamento': kwargs['taxa_religamento'],
+        'pagar_ate': kwargs['pagar_ate'],
+        'data_bloqueio': kwargs['data_bloqueio']
+    }
+    cartas = CartasCobranca(config)
 
-    # Um cliente pode ter 1 ou mais titulo em aberto...
+    # Um cliente pode ter 1 ou mais titulos em aberto...
     # Essa rotina eh responsavel por organizar os titulos, agrupando-os por cliente
     titulos = empresa.titulos_atrasados(**kwargs)
 
@@ -46,14 +55,19 @@ def gerar(idempresa, **kwargs):
 
 def test():
     gerar( 
-        1,
-        situacao = "''",
-        vcto1    = '2014-01-01',
-        vcto2    = '2014-03-31',
-        atraso1  = 10,
-        atraso2  = 150,
-        titulos1 = 2,
-        titulos2 = 5 
+        2,
+        situacao         = "''",
+        vcto1            = '1900-01-01',
+        vcto2            = '2014-03-21',
+        atraso1          = 15,
+        atraso2          = 150,
+        titulos1         = 1,
+        titulos2         = 5,
+        taxa_religamento = 10.,
+        #pagar_ate        = datetime.datetime.now()+datetime.timedelta(days = 15),
+        #data_bloqueio    = datetime.datetime.now()+datetime.timedelta(days = 20)
+        pagar_ate        = datetime.datetime(2014, 4, 9),
+        data_bloqueio    = datetime.datetime(2014, 4, 10)
     )
 
 
