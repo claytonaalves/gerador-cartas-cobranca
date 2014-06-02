@@ -47,7 +47,7 @@ class CartasCobranca:
             data_bloqueio    = self.config['data_bloqueio'].strftime('%d/%m/%Y'))
         self.cartas.append(saida)
 
-    def gerar(self):
+    def gerar(self, filename):
         """ Gera as cartas em .html e depois as processa para obter o .pdf
             Retorna o nome do arquivo .pdf para iniciar download
         """
@@ -60,16 +60,14 @@ class CartasCobranca:
         output = base_template.replace('%{body}s', final)
 
         # create a temporary file to store the .html
-        #f = tempfile.NamedTemporaryFile(mode='w', suffix='.html')
-        f = open('output.html', 'w')
+        f = tempfile.NamedTemporaryFile(mode='w', suffix='.html')
+        #f = open('output.html', 'w')
         f.write(output.encode('utf8'))
         f.flush()
 
         # generate .pdf file
         FNULL = open(os.devnull, 'w')
-        retcode = subprocess.call(["wkhtmltopdf-amd64", "-q", f.name, "output.pdf"], stdout=FNULL, stderr=FNULL)
-
-        # TODO: gravar o .pdf em um arquivo temporario e retornar o nome do arquivo
+        retcode = subprocess.call(["wkhtmltopdf-amd64", "-q", f.name, filename], stdout=FNULL, stderr=FNULL)
 
         f.close()
 
@@ -106,7 +104,7 @@ def test():
     cliente.boletos.append(titulo)
     cartas.append(cliente)
 
-    cartas.gerar()
+    cartas.gerar('/tmp/testecarta.pdf')
 
 if __name__=="__main__":
     test()
