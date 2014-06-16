@@ -6,7 +6,7 @@ import sys
 import datetime
 from collections import namedtuple
 
-sys.path.append('..')
+sys.path.append('../lib')
 from cartas import CartasCobranca
 
 empresa = namedtuple('Empresa', 'idempresa, fantasia, cidade, telefone')

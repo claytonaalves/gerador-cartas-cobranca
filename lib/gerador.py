@@ -51,23 +51,23 @@ def gerar(idempresa, **kwargs):
         cliente.boletos  = boletos
         cartas.append(cliente)
 
-    cartas.gerar()
+    cartas.gerar('novascartas.pdf')
 
 def test():
     gerar( 
-        2,
+        1,
         situacao         = "''",
         vcto1            = '1900-01-01',
-        vcto2            = '2014-03-21',
-        atraso1          = 15,
+        vcto2            = '2014-05-10',
+        atraso1          = 3,
         atraso2          = 150,
         titulos1         = 1,
         titulos2         = 5,
         taxa_religamento = 10.,
         #pagar_ate        = datetime.datetime.now()+datetime.timedelta(days = 15),
         #data_bloqueio    = datetime.datetime.now()+datetime.timedelta(days = 20)
-        pagar_ate        = datetime.datetime(2014, 4, 9),
-        data_bloqueio    = datetime.datetime(2014, 4, 10)
+        pagar_ate        = datetime.datetime(2014, 6, 2),
+        data_bloqueio    = datetime.datetime(2014, 6, 3)
     )
 
 

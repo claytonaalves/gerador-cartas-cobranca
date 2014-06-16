@@ -49,7 +49,6 @@ class CartasCobranca:
 
     def gerar(self, filename):
         """ Gera as cartas em .html e depois as processa para obter o .pdf
-            Retorna o nome do arquivo .pdf para iniciar download
         """
         base = open('%s/base.html' % dir_path, 'r')
         base_template = base.read().decode('utf8')
