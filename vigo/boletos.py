@@ -45,7 +45,7 @@ QUERY_BOLETOS_ATRASADOS = (
     "order by bol.nome, bol.vcto                                                   "
 )
 
-class Titulo:
+class Titulo(object):
 
     def __str__(self):
         return "<Titulo %s - valor: %.2f vcto: %s>" % (self.nossonumero, self.valor, self.vencimento)
