@@ -1,0 +1,277 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title></title>
+    <style type="text/css">
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .breakhere {
+            page-break-before: always
+        }
+
+        td {
+            border: 1px solid black;
+            padding: 2px;
+        }
+
+        table {
+            width: 100%;
+            font-family: Arial, sans-serif;
+            margin-bottom: 10px;
+            font-size: 11px;
+            border-collapse: collapse;
+            text-align: right;
+        }
+
+        .center {
+            text-align: center;
+        }
+
+        img {
+            margin-left: 0px; 
+        }
+
+        #empresa {
+            margin-left: 195px;
+            text-align: center;
+            padding-bottom: 7px;
+            border-bottom: 2px solid;
+        }
+
+        #endereco {
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 195px;
+            margin-top: 10px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        p {
+            margin: 0 0 5px;
+            font-size: 0.8em;
+        }
+
+        p.identado {
+            text-indent: 50px;
+        }
+
+        #emissao {
+            margin: 20px 0;
+            text-align: right;
+        }
+
+        table#titulos {
+            border: 0;
+            padding: 2px;
+            width: 90%;
+       }
+
+        table#titulos td {
+            border: 0;
+        }
+
+        table#titulos th {
+            text-decoration: underline;
+        }
+
+        table#proposta {
+            text-align: center;
+            font-size: 0.8em;
+            margin-bottom: 0;:w
+        }
+
+        table#table2 {
+            text-align: left;
+        }
+
+        table#table2 tr {
+            vertical-align: top;
+        }
+
+        table#table2 td {
+            padding: 4px 5px 0;
+        }
+
+        p.fieldtitle {
+            width: 125px;
+            text-align: left;
+            font-size: 0.9em;
+        }
+
+        p.fieldvalue {
+            font-size: 1.2em;
+            text-align: right;
+        }
+
+        p.fieldvalue span {
+            display: block;
+        }
+
+        p.destacar {
+            margin-top: 20px;
+            font-size: 1em;
+        }
+
+        p.destacar span {
+            display: block;
+        }
+    </style>
+</head>
+<body style="height: 842px; width: 670px; margin-left: auto; margin-right: auto;">
+
+    {% for carta in cartas|sort(attribute='vencimento')|groupby('nome') %}
+
+    {% set cliente = carta[1][0] %}
+
+    <div id="header">
+        <img src="logo.jpg" name="logo" align="LEFT" hspace="12" width="177" height="80" border="0">
+        <div id="empresa">{{ empresa.razao }}</div>
+        <div id="endereco">{{ empresa.endereco }} - {{ empresa.bairro }} - {{ empresa.cidade }} - {{ empresa.uf }}<br>
+        Telefone: {{ empresa.telefone }}</div>
+    </div>
+
+    <div id="emissao">Emissão: {{ emissao|data }}</div>
+
+    <p>Caro amigo(a) e cliente, {{ cliente.nome }} </p>
+    <p class="identado">Neste mês de JUNHO/2014 a {{ empresa.fantasia }} preparou pra você uma super oferta para resolver, de uma vez por todas,
+    o débito pendente do contrato nº {{ cliente.contrato }} que está em seu nome.</p>
+    <p class="identado">Regularize sua situação e volte a ser nosso assinante, podendo assim ter os melhores canais em sua TV.</p>
+    <p>CONFIRA ABAIXO O SEU DÉBITO ATUALIZADO:</p>
+
+    <table border="0" id="titulos">
+        <tbody>
+            <tr><th>Nosso Número</th><th>Vencimento</th><th>Valor com juros</th><th>Dias de atraso</th></tr>
+            {% for titulo in carta.list %}
+            <tr> 
+                <td>{{ titulo.nossonumero }}</td>
+                <td>{{ titulo.vencimento|data }}</td>
+                <td>{{ titulo.valor_com_juros|money }}</td>
+                <td>{{ titulo.dias_atraso }}</td>
+            </tr>
+            {% endfor %}
+
+            {% set valor=carta.list|sum(attribute="valor") %}
+            {% set valor_com_desconto=valor/2 %}
+
+            <tr> <td colspan="3"><span>Total: </span>{{ carta.list|sum(attribute="valor")|money }}</td> <td></td> </tr>
+        </tbody>
+    </table>
+
+    <p style="text-align: center; font-weight: bold;">COMPARE NOSSA PROPOSTA:</p>
+
+    <table border="1" id="proposta">
+        <tbody>
+            <tr><th>VALOR COM JUROS</th><th>VALOR DO DESCONTO<sup>1</sup></th><th>VALOR TOTAL A PAGAR COM DESCONTO</th><th>DATA DE VENCIMENTO</th></tr>
+            <tr> <td>{{ valor|money }}</td> <td>50%</td> <td>{{ valor_com_desconto|money }}</td> <td>{{ vencimento|data }}</td> </tr>
+        </tbody>
+    </table>
+
+    <p style="margin: 0; font-size: 0.5em"><sup>1</sup>DESCONTO VÁLIDO PARA PAGAMENTO ATÉ O VENCIMENTO.</p>
+    <p style="margin-top: 10px; font-weight: bold; text-align: center;">NÃO PERCA TEMPO. DESCONTO POR TEMPO LIMITADO!</p>
+
+    <p>Para maiores informações, entre em contato de Segunda a Sexta, das 09h às 18h. Teremos um grande prazer em atendê-lo(a). 
+    <span style="font-weight: bold">Leve esta carta para efetuar o pagamento</span>.</p>
+
+    <p style="font-size: 0.6em;">Obs.: Caso seu pagamento já tenha sido normalizado após o envio desta carta, entre em contato para desconsiderar este aviso do sistema de
+    Cobrança Automático da {{ empresa.fantasia }}. Tel.: {{ empresa.telefone }}.</p>
+
+    <p style=" margin-top: 10px; margin-bottom: 0; font-size: .6em; text-align: right; ">corte aqui</p>
+    <div style="border-bottom: 1px dashed; margin-top: 0; margin-bottom: 5px;"></div>
+
+
+    <table border="1" id="table2">
+        <tbody>
+            <tr>
+                <td>Local para Pagamento: {{ local_pagamento }}</td>
+                <td>
+                    <p class="fieldtitle">Vencimento:</p>
+                    <p class="fieldvalue">{{ vencimento|data }}</p>
+                </td>
+                <td style="width: 200px;">
+                    <p class="fieldtitle">Vencimento:</p>
+                    <p class="fieldvalue">{{ vencimento|data }}</p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p class="fieldtitle">Cedente:</p>
+                    <p class="fieldvalue">{{ empresa.fantasia }}</p>
+                </td>
+                <td>
+                    <p class="fieldtitle">Valor do documento:</p>
+                    <p class="fieldvalue">{{ valor_com_desconto|money }}</p>
+                </td>
+                <td>
+                    <p class="fieldtitle">Valor do documento:</p>
+                    <p class="fieldvalue">{{ valor_com_desconto|money }}</p>
+                </td>
+            </tr>
+            <tr>
+                <td rowspan="3">
+                    <p class="fieldtitle" style="float: right">Contrato: <span>{{ cliente.contrato }}</span></p>
+                    <p class="fieldtitle">Sacado:</p>
+                    <p class="fieldvalue" style="text-align: left">
+                        <span>{{ cliente.nome }}</span>
+                        <span>{{ cliente.endereco }}</span>
+                        <span>Bairro: {{ cliente.bairro }}</span>
+                        <span>Cidade: {{ cliente.cidade }} - UF: {{ cliente.uf }}</span>
+                        <span>{{ cliente.cep }}</span>
+                    </p>
+                </td>
+                <td rowspan="3">
+                    <p class="fieldtitle">Data de pagamento:</p>
+                    <div>______/______/______</div>
+                </td>
+                <td>
+                    <p class="fieldtitle">Sacado: {{ cliente.nome }}
+                    <div>{{ cliente.endereco }}<div></p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p class="fieldtitle">Número do contrato:</p>
+                    <p class="fieldvalue">{{ cliente.contrato }}</p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p class="fieldtitle">Data de pagamento:</p>
+                    <div>______/______/______</div>
+                </td>
+            </tr>
+            <tr style="height: 62px;">
+                <td colspan="2">
+                    <p class="fieldtitle">Carimbo:</p>
+                </td>
+                <td>
+                    <p class="fieldtitle">Carimbo:</p>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <p style=" margin-top: 10px; margin-bottom: 0; font-size: .6em; text-align: right; ">corte aqui</p>
+    <div style="border-bottom: 1px dashed; margin-top: 0; margin-bottom: 5px;"></div>
+
+    <p class="destacar">
+        DESTINATÁRIO:
+        <span>{{ cliente.nome }}</span>
+        <span>ENDEREÇO: {{ cliente.endereco }}</span>
+        <span>BAIRRO: {{ cliente.bairro }}</span>
+        <span>CIDADE: {{ cliente.cidade }} – UF: {{ cliente.uf }}</span>
+        <span>CEP: {{ cliente.cep }}</span>
+    </p>
+
+    <div style="clear: both;"></div>
+
+    <div class="breakhere"></div>
+
+    {% endfor %}
+</body>
+</html>
+
+
