@@ -1,110 +1,55 @@
 #coding: utf8
 import os
 import subprocess
-import datetime
+from datetime import datetime, timedelta
 import tempfile
-from string import Template
-
-path = os.path.abspath(__file__)
-dir_path = os.path.dirname(path)
+from jinja2 import Environment, FileSystemLoader
+from shutil import copyfile
 
 class CartasCobranca:
 
-    def __init__(self, config):
-        self.cartas = []
-        self.config = config
-        self.empresa = config['empresa']
+    local_pagamento = 'Indefinido'
 
-    def append(self, cliente):
-        """ Adiciona uma carta a coleção de cartas.
+    def __init__(self, template_path=None, template=None):
+        self.template_path = template_path
+        self.template      = template
+
+    def data_filter(self, value):
+        return value.strftime('%d/%m/%Y')
+
+    def money_filter(self, value):
+        value = '%.2f' % value
+        return value.replace('.', ',')
+
+    def gerar(self, titulos, filename):
+        """ Gera as cartas em um arquivo .html e depois o processa para obter o .pdf
         """
-        template = open('%s/template.html' % dir_path, 'r').read().decode('utf8')
-        s = Template(template)
+        env = Environment(loader=FileSystemLoader(self.template_path))
+        env.filters['data'] = self.data_filter
+        env.filters['money'] = self.money_filter
+        self.template = env.get_template(self.template)
 
-        boletos_tpl = Template('$nnumero  $vencimento  $valor')
-
-        titulos = []
-        for titulo in cliente.boletos:
-            titulos.append(boletos_tpl.substitute(
-                nnumero    = titulo.nnumero,
-                vencimento = titulo.vencimento.strftime('%d/%m/%Y'),
-                valor      = ("%.2f" % titulo.valor).replace('.', ',')))
-
-        saida = s.substitute(
-            nome_empresa     = self.empresa.fantasia,
-            cidade           = self.empresa.cidade,
-            data             = datetime.datetime.now().strftime('%d/%m/%Y'),
-            nome_cliente     = cliente.nome,
-            contrato         = str(cliente.numero).zfill(5),
-            endereco         = cliente.endereco,
-            bairro           = cliente.bairro,
-            telefone         = cliente.telefone,
-            telefone_empresa = self.empresa.telefone,
-            logofile         = '%s/logo_empresa_%s.jpg' % (dir_path, self.empresa.idempresa),
-            taxa_religamento = self.config['taxa_religamento'],
-            lista_boletos    = '\n'.join(titulos),
-            pagar_ate        = self.config['pagar_ate'].strftime('%d/%m/%Y'),
-            data_bloqueio    = self.config['data_bloqueio'].strftime('%d/%m/%Y'))
-        self.cartas.append(saida)
-
-    def gerar(self, filename):
-        """ Gera as cartas em .html e depois as processa para obter o .pdf
-        """
-        base = open('%s/base.html' % dir_path, 'r')
-        base_template = base.read().decode('utf8')
-        base.close()
-
-        final = "".join(self.cartas)
-
-        output = base_template.replace('%{body}s', final)
+        saida = self.template.render(
+            empresa          = self.empresa,
+            titulos          = titulos,
+            emissao          = datetime.now(),
+            taxa_religamento = self.taxa_religamento,
+            pagar_ate        = datetime.now()+timedelta(days = 15),
+            data_bloqueio    = datetime.now()+timedelta(days = 20),
+            local_pagamento  = self.local_pagamento
+        )
 
         # create a temporary file to store the .html
         f = tempfile.NamedTemporaryFile(mode='w', suffix='.html')
-        #f = open('output.html', 'w')
-        f.write(output.encode('utf8'))
+        f.write(saida.encode('utf8'))
         f.flush()
+
+        # copy logo file
+        copyfile('%s/logo_empresa_%d.jpg' % (self.template_path, self.empresa.idempresa), '/tmp/logo_empresa_%d.jpg' % self.empresa.idempresa)
 
         # generate .pdf file
         FNULL = open(os.devnull, 'w')
-        retcode = subprocess.call(["wkhtmltopdf-amd64", "-q", f.name, filename], stdout=FNULL, stderr=FNULL)
+        retcode = subprocess.call(["wkhtmltopdf", "-q", f.name, filename], stdout=FNULL, stderr=FNULL)
 
         f.close()
-
-def test():
-    from collections import namedtuple
-    empresa = namedtuple('Empresa', 'idempresa, fantasia, cidade, telefone')
-    cliente = namedtuple('Cliente', 'numero, nome, endereco, bairro, telefone, boletos')
-
-    config = {
-        'empresa'          : empresa,
-        'taxa_religamento' : 10.2,
-        'pagar_ate'        : datetime.datetime.now()+datetime.timedelta(days=15),
-        'data_bloqueio'    : datetime.datetime.now()+datetime.timedelta(days=20)
-    }
-
-    empresa.idempresa = 1
-    empresa.fantasia = 'Clayton Co'
-    empresa.cidade = 'Alta Floresta - MT'
-    empresa.telefone = '3333-3333'
-    cartas = CartasCobranca(config)
-
-    # Cria um cliente com um titulo
-    cliente.numero = 1234
-    cliente.nome = 'Clayton de Almeida Alves'
-    cliente.endereco = 'Rua das flores'
-    cliente.bairro = 'Centro'
-    cliente.telefone = '1234-4321'
-    cliente.boletos = []
-
-    titulo = namedtuple('Titulo', 'nnumero, vencimento, valor')
-    titulo.nnumero = '00000000001-1'
-    titulo.vencimento = datetime.datetime.now()
-    titulo.valor = 42.42
-    cliente.boletos.append(titulo)
-    cartas.append(cliente)
-
-    cartas.gerar('/tmp/testecarta.pdf')
-
-if __name__=="__main__":
-    test()
 
