@@ -1,10 +1,11 @@
 import sys
 sys.path.insert(1, '../..')
 
-from dbconn import conn
+import MySQLdb
 from vigo import Empresa
 
 def test():
+    conn = MySQLdb.connect('localhost', 'testuser', '1234', 'vigo')
     empresa = Empresa(1, conn)
     print empresa
 
