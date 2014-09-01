@@ -7,7 +7,7 @@ h1, .h1 {
 }
 
 .line {
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
 .fluidMedia {
@@ -24,4 +24,18 @@ h1, .h1 {
     left: 0;
     width: 100%;
     height: 100%;
+}
+
+label {
+    font-weight: normal;
+}
+
+input[type="radio"], input[type="checkbox"] {
+    margin-left: 18px;
+    margin-top: 10px;
+}
+
+.bloco {
+    width: 175px;
+    display: inline-block; 
 }

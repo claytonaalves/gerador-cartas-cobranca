@@ -34,8 +34,8 @@ class CartasCobranca:
             titulos          = titulos,
             emissao          = datetime.now(),
             taxa_religamento = self.taxa_religamento,
-            pagar_ate        = datetime.now()+timedelta(days = 15),
-            data_bloqueio    = datetime.now()+timedelta(days = 20),
+            pagar_ate        = self.pagar_ate,
+            data_bloqueio    = self.data_bloqueio,
             local_pagamento  = self.local_pagamento
         )
 

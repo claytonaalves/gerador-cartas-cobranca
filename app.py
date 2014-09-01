@@ -2,6 +2,7 @@
 import sys
 sys.path.append('./lib')
 
+import os
 import os.path
 import MySQLdb
 from bottle import route, run, template, request, static_file, redirect
@@ -11,7 +12,12 @@ from datetime import datetime, timedelta
 
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__)) 
 
-conn = MySQLdb.connect('localhost', 'root', '', 'vigo')
+DB_HOST     = os.environ.get('DB_HOST'     , 'localhost')
+DB_USER     = os.environ.get('DB_USER'     , 'testuser')
+DB_PASSWORD = os.environ.get('DB_PASSWORD' , '1234')
+DB_NAME     = os.environ.get('DB_NAME'     , 'vigo')
+
+conn = MySQLdb.connect(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, charset='latin1', use_unicode=True)
 
 @route('/static/<filename:path>')
 def static_files(filename):
@@ -26,7 +32,9 @@ def static_files(filename):
 def main():
     cursor = conn.cursor()
     cursor.execute('select id, fantasia from empresas')
-    return template('index.html', empresas=cursor)
+    taxa_religamento = "10,00"
+    return template('index.html', empresas=cursor, taxa_religamento=taxa_religamento)
+
 
 #
 # Gera as cartas e retorna o link para download
@@ -44,37 +52,43 @@ def cartas():
 
     data_inicial   = request.forms.get('data_inicial')
     data_final     = request.forms.get('data_final')
-    diasatraso1    = int(request.forms.get('diasatraso1'))
-    diasatraso2    = int(request.forms.get('diasatraso2'))
-    parcelaatraso1 = int(request.forms.get('parcelaatraso1'))
-    parcelaatraso2 = int(request.forms.get('parcelaatraso2'))
+    data_pagamento = request.forms.get('data_pagamento')
+    data_corte     = request.forms.get('data_corte')
 
-    titulos = boletos.atrasados(conn,
+    if data_inicial=='' or data_final=='' or data_pagamento=='' or data_corte=='':
+        redirect('/')
+
+    titulos = boletos.atrasados(
+        conn,
         idempresa = idempresa,
         situacao  = situacoes[request.forms.get('situacao')],
-        vcto1     = datetime.strptime(data_inicial, '%d/%m/%Y').strftime('%Y-%m-%d'),
-        vcto2     = datetime.strptime(data_final, '%d/%m/%Y').strftime('%Y-%m-%d'),
-        atraso1   = diasatraso1,
-        atraso2   = diasatraso2,
-        titulos1  = parcelaatraso1,
-        titulos2  = parcelaatraso2,
-        juros     = 0.21
+        vcto1     = datetime.strptime(data_inicial, '%d/%m/%Y'),
+        vcto2     = datetime.strptime(data_final, '%d/%m/%Y'),
     )
+
+    titulos = [titulo for titulo in titulos]
+    if not titulos:
+        redirect('/semboletos')
 
     cartas = CartasCobranca()
     cartas.empresa = empresa
     cartas.template_path = 'templates'
     cartas.template      = 'template1.html'
-    cartas.taxa_religamento = 10.2
-    cartas.pagar_ate = datetime.now()+timedelta(days=15)
-    cartas.data_bloqueio = datetime.now()+timedelta(days=20)
-    #cartas.local_pagamento = 'ESCRITÓRIO GUSMÃO E CIA Parque Shopping – 2o piso – Centro – Cordeiro – RJ'
+    cartas.taxa_religamento = request.forms.get('taxa_religamento')
+    cartas.pagar_ate = datetime.strptime(data_pagamento, '%d/%m/%Y')
+    cartas.data_bloqueio = datetime.strptime(data_corte, '%d/%m/%Y')
 
     pdfname = 'cartas_cobranca_%s_a_%s' % (data_inicial.replace('/', '-'), data_final.replace('/', '-'))
 
     cartas.gerar(titulos, '%s/download/%s.pdf' % (ROOT_PATH, pdfname))
 
     redirect('/download/%s.pdf' % pdfname)
+
+
+@route('/semboletos')
+def semboletos():
+    return "Nao existem boletos nesta filtragem!"
+
 
 @route('/download/<filename:path>')
 def download(filename):

@@ -35,24 +35,32 @@
                 </div>
 
                 <div class="line">
-                    <div><label for="eDiasAtraso1">Dias em atraso</label></div>
-                    <input type="number" id="eDiasAtraso1" name="diasatraso1" value="1">
-                    <label for="eDiasAtraso2">até</label>
-                    <input type="number" id="eDiasAtraso2" name="diasatraso2" value="15">
+                    <div class="bloco">
+                        <label for="data_inicial">Vencimento inicial: </label>
+                        <input type="text" name="data_inicial" value="" id="data_inicial">
+                    </div>
+                    <div class="bloco">
+                        <label for="data_final">Vencimento final:</label>
+                        <input type="text" name="data_final" value="" id="data_final">
+                    </div>
                 </div>
 
                 <div class="line">
-                    <div><label for="eParcelaAtraso1">Parcelas em atraso</label></div>
-                    <input type="number" id="eDiasAtraso1" name="parcelaatraso1" value="1">
-                    <label for="eParcelaAtraso2">até</label>
-                    <input type="number" id="eDiasAtraso2" name="parcelaatraso2" value="2">
+                    <div class="bloco">
+                        <label for="data_pagamento">Data para pagamento:</label>
+                        <input type="text" name="data_pagamento" value="" id="data_pagamento">
+                    </div>
+                    <div class="bloco">
+                        <label for="data_corte">Data do corte:</label>
+                        <input type="text" name="data_corte" value="" id="data_corte">
+                    </div>
                 </div>
 
                 <div class="line">
-                    <div>Período de vencimento: </div>
-                    <input type="text" name="data_inicial" value="" id="data_inicial">
-                    <label for="data2">até</label>
-                    <input type="text" name="data_final" value="" id="data_final">
+                    <div class="bloco">
+                        <label for="taxa_religamento">Taxa de religamento</label>
+                        <input type="text" name="taxa_religamento" value="{{taxa_religamento}}" id="taxa_religamento">
+                    </div>
                 </div>
 
                 <p><input type="submit" value="Gerar"></p>

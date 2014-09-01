@@ -16,10 +16,10 @@ class Empresa:
         fantasia, razao, endereco, cidade, uf, bairro, telefone = self.cursor.fetchone()
 
         self.idempresa = idempresa
-        self.razao     = razao.decode('latin1')
-        self.fantasia  = fantasia.decode('latin1')
-        self.endereco  = endereco.decode('latin1')
-        self.cidade    = cidade.decode('latin1')
+        self.razao     = razao
+        self.fantasia  = fantasia
+        self.endereco  = endereco
+        self.cidade    = cidade
         self.uf        = uf
         self.bairro    = bairro
         self.telefone  = telefone
