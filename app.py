@@ -30,6 +30,7 @@ def static_files(filename):
 #
 @route('/')
 def main():
+    conn.ping(True)
     cursor = conn.cursor()
     cursor.execute('select id, fantasia from empresas')
     taxa_religamento = "10,00"
@@ -68,7 +69,7 @@ def cartas():
 
     titulos = [titulo for titulo in titulos]
     if not titulos:
-        redirect('/semboletos')
+        redirect('semboletos')
 
     cartas = CartasCobranca()
     cartas.empresa = empresa
@@ -82,7 +83,7 @@ def cartas():
 
     cartas.gerar(titulos, '%s/download/%s.pdf' % (ROOT_PATH, pdfname))
 
-    redirect('/download/%s.pdf' % pdfname)
+    redirect('download/%s.pdf' % pdfname)
 
 
 @route('/semboletos')
