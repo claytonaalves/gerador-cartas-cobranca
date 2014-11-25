@@ -20,6 +20,7 @@ QUERY_BOLETOS_ATRASADOS = (
     "    (bol.vcto between '%s' and '%s') and                 "
     "    bol.idempresa=%d and                                 "
     "    cli.situacao in (%s)                                 "
+    " %s                                                      "
     "order by bol.nome, bol.vcto                              "
 )
 
@@ -28,7 +29,7 @@ class Titulo(object):
     def __str__(self):
         return "<Titulo %s - valor: %.2f vcto: %s>" % (self.nossonumero, self.valor, self.vencimento)
 
-def atrasados(conn, idempresa, situacao, vcto1, vcto2):
+def atrasados(conn, idempresa, situacao, vcto1, vcto2, grupo):
     """ Retorna um generator com a lista de titulos em atraso
 
     :param conn: conexao com o banco mysql
@@ -38,7 +39,11 @@ def atrasados(conn, idempresa, situacao, vcto1, vcto2):
     :param vcto2: data final do vencimento
     """
     cursor = conn.cursor()
-    query = QUERY_BOLETOS_ATRASADOS % (vcto1.strftime('%Y-%m-%d'), vcto2.strftime('%Y-%m-%d'), idempresa, situacao)
+    filtro = ""
+    if grupo!='todos':
+        filtro = 'AND grupocliente=("%s")' % grupo
+
+    query = QUERY_BOLETOS_ATRASADOS % (vcto1.strftime('%Y-%m-%d'), vcto2.strftime('%Y-%m-%d'), idempresa, situacao, filtro)
 
     cursor.execute(query)
 

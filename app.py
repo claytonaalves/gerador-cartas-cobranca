@@ -32,9 +32,15 @@ def static_files(filename):
 def main():
     conn.ping(True)
     cursor = conn.cursor()
+
     cursor.execute('select id, fantasia from empresas')
+    empresas = cursor.fetchall()
+
+    cursor.execute('select distinct grupocliente from usuarios where TRIM(grupocliente)<>""')
+    grupos = cursor.fetchall()
+
     taxa_religamento = "10,00"
-    return template('index.html', empresas=cursor, taxa_religamento=taxa_religamento)
+    return template('index.html', empresas=empresas, grupos=grupos, taxa_religamento=taxa_religamento)
 
 
 #
@@ -49,6 +55,7 @@ def cartas():
         "todos"       : "'', 'B', 'X'"
     }
     idempresa = int(request.forms.get('empresa'))
+    grupo = request.forms.get('grupo')
     empresa = Empresa(idempresa, conn)
 
     data_inicial   = request.forms.get('data_inicial')
@@ -65,6 +72,7 @@ def cartas():
         situacao  = situacoes[request.forms.get('situacao')],
         vcto1     = datetime.strptime(data_inicial, '%d/%m/%Y'),
         vcto2     = datetime.strptime(data_final, '%d/%m/%Y'),
+        grupo     = grupo
     )
 
     titulos = [titulo for titulo in titulos]
@@ -101,8 +109,9 @@ def download(filename):
                #, download=True
            )          
 
-run( host='0.0.0.0',
-     port=8080,
-     debug=True, 
-     reloader=True 
- )
+if __name__=="__main__":
+    run( host='0.0.0.0',
+         port=8080,
+         debug=True, 
+         reloader=True 
+     )
