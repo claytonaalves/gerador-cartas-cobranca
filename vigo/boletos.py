@@ -1,35 +1,43 @@
 QUERY_BOLETOS_ATRASADOS = (
-    "select                                                   "
+    "SELECT                                                   "
     "    bol.nnumero,                                         "
     "    bol.vcto,                                            "
-    "    datediff(curdate(), bol.vcto) as dias_atraso,        "
+    "    DATEDIFF(CURDATE(), bol.vcto) AS dias_atraso,        "
     "    bol.valor,                                           "
     "    cli.nome,                                            "
     "    cli.numero,                                          "
-    "    lpad(cli.numero, 5, '0') as contrato,                "
+    "    LPAD(cli.numero, 5, '0') AS contrato,                "
     "    cli.cidade,                                          "
     "    cli.uf,                                              "
     "    cli.cep,                                             "
     "    cli.endereco,                                        "
     "    cli.bairro,                                          "
     "    cli.telefone                                         "
-    "from boletos bol                                         "
-    "left join usuarios cli on (bol.numero=cli.numero)        "
-    "where                                                    "
-    "    bol.pago='0' and                                     "
-    "    (bol.vcto between '%s' and '%s') and                 "
-    "    bol.idempresa=%d and                                 "
-    "    cli.situacao in (%s)                                 "
-    " %s                                                      "
-    "order by bol.nome, bol.vcto                              "
+    "FROM boletos bol                                         "
+    "LEFT JOIN (                                              "
+    "    SELECT numero, COUNT(*) AS qtde                      "
+    "    FROM boletos b2                                      "
+    "    WHERE b2.pago='0' AND b2.vcto<CURDATE()              "
+    "    AND (b2.vcto between '{}' AND '{}')                  "
+    "    GROUP BY 1                                           "
+    ") t3 ON (t3.numero=bol.numero)                           "
+    "LEFT JOIN usuarios cli ON (bol.numero=cli.numero)        "
+    "WHERE                                                    "
+    "    bol.pago='0'                                         "
+    "    and (bol.vcto between '{}' and '{}')                 "
+    "    and bol.idempresa={}                                 "
+    "    and cli.situacao in ({})                             "
+    "    and t3.qtde between {} and {}                        "
+    " {}                                                      "
+    "ORDER BY bol.nome, bol.vcto                              "
 )
 
 class Titulo(object):
 
     def __str__(self):
-        return "<Titulo %s - valor: %.2f vcto: %s>" % (self.nossonumero, self.valor, self.vencimento)
+        return "<Titulo %s - valor: %.2f vcto: %s idcliente: %s>" % (self.nossonumero, self.valor, self.vencimento, self.numero)
 
-def atrasados(conn, idempresa, situacao, vcto1, vcto2, grupo):
+def atrasados(conn, idempresa, situacao, vcto1, vcto2, grupo, qtde_boletos_vencidos):
     """ Retorna um generator com a lista de titulos em atraso
 
     :param conn: conexao com o banco mysql
@@ -43,7 +51,19 @@ def atrasados(conn, idempresa, situacao, vcto1, vcto2, grupo):
     if grupo!='todos':
         filtro = 'AND grupocliente=("%s")' % grupo
 
-    query = QUERY_BOLETOS_ATRASADOS % (vcto1.strftime('%Y-%m-%d'), vcto2.strftime('%Y-%m-%d'), idempresa, situacao, filtro)
+    query = QUERY_BOLETOS_ATRASADOS.format(
+       vcto1.strftime('%Y-%m-%d'), 
+       vcto2.strftime('%Y-%m-%d'),
+       vcto1.strftime('%Y-%m-%d'), 
+       vcto2.strftime('%Y-%m-%d'),
+       idempresa, 
+       situacao, 
+       qtde_boletos_vencidos[0],
+       qtde_boletos_vencidos[1],
+       filtro,
+    )
+
+    #import ipdb; ipdb.set_trace()
 
     cursor.execute(query)
 
@@ -68,4 +88,16 @@ def atrasados(conn, idempresa, situacao, vcto1, vcto2, grupo):
         titulo.telefone        = telefone
 
         yield titulo
+
+
+if __name__=="__main__":
+    from datetime import datetime
+    import MySQLdb
+    conn = MySQLdb.connect('localhost', 'root', '', 'vigo')
+    vcto1 = datetime(2015, 1, 1)
+    vcto2 = datetime(2015, 8, 31)
+    situacao = "'', 'B', 'X'"
+    titulos = atrasados(conn, 1, situacao, vcto1, vcto2, 'todos', (1, 3))
+    for titulo in titulos:
+        print titulo
 

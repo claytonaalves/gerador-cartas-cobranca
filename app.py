@@ -13,8 +13,8 @@ from datetime import datetime, timedelta
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__)) 
 
 DB_HOST     = os.environ.get('DB_HOST'     , 'localhost')
-DB_USER     = os.environ.get('DB_USER'     , 'testuser')
-DB_PASSWORD = os.environ.get('DB_PASSWORD' , '1234')
+DB_USER     = os.environ.get('DB_USER'     , 'root')
+DB_PASSWORD = os.environ.get('DB_PASSWORD' , '')
 DB_NAME     = os.environ.get('DB_NAME'     , 'vigo')
 
 conn = MySQLdb.connect(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, charset='latin1', use_unicode=True)
@@ -62,6 +62,8 @@ def cartas():
     data_final     = request.forms.get('data_final')
     data_pagamento = request.forms.get('data_pagamento')
     data_corte     = request.forms.get('data_corte')
+    qtde1          = request.forms.get('qtde_boletos1')
+    qtde2          = request.forms.get('qtde_boletos2')
 
     if data_inicial=='' or data_final=='' or data_pagamento=='' or data_corte=='':
         redirect('/')
@@ -72,7 +74,8 @@ def cartas():
         situacao  = situacoes[request.forms.get('situacao')],
         vcto1     = datetime.strptime(data_inicial, '%d/%m/%Y'),
         vcto2     = datetime.strptime(data_final, '%d/%m/%Y'),
-        grupo     = grupo
+        grupo     = grupo,
+        qtde_boletos_vencidos = (qtde1, qtde2)
     )
 
     titulos = [titulo for titulo in titulos]

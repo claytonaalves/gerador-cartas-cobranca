@@ -17,7 +17,7 @@
                     <label for="empresa">Empresa:</label>
                     <select name="empresa" id="empresa">
                         %for iid, empresa in empresas:
-                        <option value="{{iid}}">{{empresa}}</option>
+                        <option value="{{iid}}">{{iid}} - {{empresa}}</option>
                         %end
                     </select>
                 </div>
@@ -52,6 +52,17 @@
                     <div class="bloco">
                         <label for="data_final">Vencimento final:</label>
                         <input type="text" name="data_final" value="" id="data_final">
+                    </div>
+                </div>
+
+                <div class="line">
+                    <div class="bloco">
+                        <label for="qtde_boletos1">Qtde boletos 1:</label>
+                        <input type="text" name="qtde_boletos1" value="1" id="qtde_boletos1">
+                    </div>
+                    <div class="bloco">
+                        <label for="qtde_boletos2">Qtde boletos 2:</label>
+                        <input type="text" name="qtde_boletos2" value="1" id="qtde_boletos2">
                     </div>
                 </div>
 
