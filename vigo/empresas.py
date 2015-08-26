@@ -10,6 +10,7 @@ class Empresa:
         :param idempresa: id da empresa de onde serao listados os titulos
         :param conn: conexao com o mysql
         """
+        conn.ping(True)
         self.cursor = conn.cursor()
 
         self.cursor.execute(self._query_, (idempresa,))
