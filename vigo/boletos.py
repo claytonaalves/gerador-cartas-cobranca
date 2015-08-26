@@ -18,17 +18,17 @@ QUERY_BOLETOS_ATRASADOS = (
     "    SELECT numero, COUNT(*) AS qtde                      "
     "    FROM boletos b2                                      "
     "    WHERE b2.pago='0' AND b2.vcto<CURDATE()              "
-    "    AND (b2.vcto between '{}' AND '{}')                  "
+    "    AND (b2.vcto between '{0}' AND '{1}')                "
     "    GROUP BY 1                                           "
     ") t3 ON (t3.numero=bol.numero)                           "
     "LEFT JOIN usuarios cli ON (bol.numero=cli.numero)        "
     "WHERE                                                    "
     "    bol.pago='0'                                         "
-    "    and (bol.vcto between '{}' and '{}')                 "
-    "    and bol.idempresa={}                                 "
-    "    and cli.situacao in ({})                             "
-    "    and t3.qtde between {} and {}                        "
-    " {}                                                      "
+    "    and (bol.vcto between '{2}' and '{3}')               "
+    "    and bol.idempresa={4}                                "
+    "    and cli.situacao in ({5})                            "
+    "    and t3.qtde between {6} and {7}                      "
+    " {8}                                                     "
     "ORDER BY bol.nome, bol.vcto                              "
 )
 
@@ -62,8 +62,6 @@ def atrasados(conn, idempresa, situacao, vcto1, vcto2, grupo, qtde_boletos_venci
        qtde_boletos_vencidos[1],
        filtro,
     )
-
-    #import ipdb; ipdb.set_trace()
 
     cursor.execute(query)
 
