@@ -1,11 +1,13 @@
+from itertools import groupby
+
 QUERY_BOLETOS_ATRASADOS = (
     "SELECT                                                   "
+    "    cli.numero,                                          "
     "    bol.nnumero,                                         "
     "    bol.vcto,                                            "
     "    DATEDIFF(CURDATE(), bol.vcto) AS dias_atraso,        "
     "    bol.valor,                                           "
     "    cli.nome,                                            "
-    "    cli.numero,                                          "
     "    LPAD(cli.numero, 5, '0') AS contrato,                "
     "    cli.cidade,                                          "
     "    cli.uf,                                              "
@@ -14,21 +16,13 @@ QUERY_BOLETOS_ATRASADOS = (
     "    cli.bairro,                                          "
     "    cli.telefone                                         "
     "FROM boletos bol                                         "
-    "LEFT JOIN (                                              "
-    "    SELECT numero, COUNT(*) AS qtde                      "
-    "    FROM boletos b2                                      "
-    "    WHERE b2.pago='0' AND b2.vcto<CURDATE()              "
-    "    AND (b2.vcto between '{0}' AND '{1}')                "
-    "    GROUP BY 1                                           "
-    ") t3 ON (t3.numero=bol.numero)                           "
     "LEFT JOIN usuarios cli ON (bol.numero=cli.numero)        "
     "WHERE                                                    "
     "    bol.pago='0'                                         "
-    "    and (bol.vcto between '{2}' and '{3}')               "
-    "    and bol.idempresa={4}                                "
-    "    and cli.situacao in ({5})                            "
-    "    and t3.qtde between {6} and {7}                      "
-    " {8}                                                     "
+    "    and (bol.vcto between '{0}' and '{1}')               "
+    "    and bol.idempresa={2}                                "
+    "    and cli.situacao in ({3})                            "
+    " {4}                                                     "
     "ORDER BY bol.nome, bol.vcto                              "
 )
 
@@ -54,38 +48,42 @@ def atrasados(conn, idempresa, situacao, vcto1, vcto2, grupo, qtde_boletos_venci
     query = QUERY_BOLETOS_ATRASADOS.format(
        vcto1.strftime('%Y-%m-%d'), 
        vcto2.strftime('%Y-%m-%d'),
-       vcto1.strftime('%Y-%m-%d'), 
-       vcto2.strftime('%Y-%m-%d'),
        idempresa, 
        situacao, 
-       qtde_boletos_vencidos[0],
-       qtde_boletos_vencidos[1],
        filtro,
     )
 
     cursor.execute(query)
+    boletos = cursor.fetchall()
 
-    for record in cursor:
-        nnumero, vencimento, dias_atraso, valor, nome, numero, contrato, \
-        cidade, uf, cep, endereco, bairro, telefone = record
+    q1, q2 = qtde_boletos_vencidos
 
-        titulo                 = Titulo()
-        titulo.nossonumero     = nnumero
-        titulo.vencimento      = vencimento
-        titulo.dias_atraso     = dias_atraso
-        titulo.valor           = valor
-        titulo.valor_com_juros = valor
-        titulo.nome            = nome
-        titulo.numero          = numero
-        titulo.contrato        = contrato
-        titulo.cidade          = cidade
-        titulo.uf              = uf
-        titulo.cep             = cep
-        titulo.endereco        = endereco
-        titulo.bairro          = bairro
-        titulo.telefone        = telefone
+    for idcliente, group in groupby(boletos, lambda x: x[0]):
+        titulos = [t for t in group]
+        if not (q1 <= len(titulos) <= q2):
+            continue
 
-        yield titulo
+        for record in titulos:
+            numero, nnumero, vencimento, dias_atraso, valor, nome, contrato, \
+            cidade, uf, cep, endereco, bairro, telefone = record
+
+            titulo                 = Titulo()
+            titulo.nossonumero     = nnumero
+            titulo.vencimento      = vencimento
+            titulo.dias_atraso     = dias_atraso
+            titulo.valor           = valor
+            titulo.valor_com_juros = valor
+            titulo.nome            = nome
+            titulo.numero          = numero
+            titulo.contrato        = contrato
+            titulo.cidade          = cidade
+            titulo.uf              = uf
+            titulo.cep             = cep
+            titulo.endereco        = endereco
+            titulo.bairro          = bairro
+            titulo.telefone        = telefone
+
+            yield titulo
 
 
 if __name__=="__main__":
@@ -93,9 +91,10 @@ if __name__=="__main__":
     import MySQLdb
     conn = MySQLdb.connect('localhost', 'root', '', 'vigo')
     vcto1 = datetime(2015, 1, 1)
-    vcto2 = datetime(2015, 8, 31)
+    vcto2 = datetime(2015, 3, 30)
     situacao = "'', 'B', 'X'"
-    titulos = atrasados(conn, 1, situacao, vcto1, vcto2, 'todos', (1, 3))
+    idempresa = 2
+    titulos = atrasados(conn, idempresa, situacao, vcto1, vcto2, 'todos', (3, 5))
     for titulo in titulos:
         print titulo
 
