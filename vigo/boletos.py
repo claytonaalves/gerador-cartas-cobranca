@@ -56,7 +56,8 @@ def atrasados(conn, idempresa, situacao, vcto1, vcto2, grupo, qtde_boletos_venci
     cursor.execute(query)
     boletos = cursor.fetchall()
 
-    q1, q2 = qtde_boletos_vencidos
+    q1 = int(qtde_boletos_vencidos[0])
+    q2 = int(qtde_boletos_vencidos[1])
 
     for idcliente, group in groupby(boletos, lambda x: x[0]):
         titulos = [t for t in group]
