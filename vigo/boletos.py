@@ -19,10 +19,10 @@ QUERY_BOLETOS_ATRASADOS = (
     "LEFT JOIN usuarios cli ON (bol.numero=cli.numero)        "
     "WHERE                                                    "
     "    bol.pago='0'                                         "
-    "    and (bol.vcto between '{0}' and '{1}')               "
-    "    and bol.idempresa={2}                                "
-    "    and cli.situacao in ({3})                            "
-    " {4}                                                     "
+    #"    and (bol.vcto between '{0}' and '{1}')               "
+    "    and bol.idempresa={0}                                "
+    "    and cli.situacao in ({1})                            "
+    " {2}                                                     "
     "ORDER BY bol.nome, bol.vcto                              "
 )
 
@@ -46,8 +46,6 @@ def atrasados(conn, idempresa, situacao, vcto1, vcto2, grupo, qtde_boletos_venci
         filtro = 'AND grupocliente=("%s")' % grupo
 
     query = QUERY_BOLETOS_ATRASADOS.format(
-       vcto1.strftime('%Y-%m-%d'), 
-       vcto2.strftime('%Y-%m-%d'),
        idempresa, 
        situacao, 
        filtro,
@@ -67,6 +65,9 @@ def atrasados(conn, idempresa, situacao, vcto1, vcto2, grupo, qtde_boletos_venci
         for record in titulos:
             numero, nnumero, vencimento, dias_atraso, valor, nome, contrato, \
             cidade, uf, cep, endereco, bairro, telefone = record
+
+            if not (vcto1 <= vencimento <= vcto2):
+                continue
 
             titulo                 = Titulo()
             titulo.nossonumero     = nnumero
@@ -88,14 +89,14 @@ def atrasados(conn, idempresa, situacao, vcto1, vcto2, grupo, qtde_boletos_venci
 
 
 if __name__=="__main__":
-    from datetime import datetime
+    from datetime import date
     import MySQLdb
-    conn = MySQLdb.connect('localhost', 'root', '', 'vigo')
-    vcto1 = datetime(2015, 1, 1)
-    vcto2 = datetime(2015, 3, 30)
+    conn = MySQLdb.connect(host='127.0.0.1', user='root', passwd='', db='vigo')
+    vcto1 = date(2015, 1, 1)
+    vcto2 = date(2015, 11, 15)
     situacao = "'', 'B', 'X'"
     idempresa = 2
-    titulos = atrasados(conn, idempresa, situacao, vcto1, vcto2, 'todos', (3, 5))
+    titulos = atrasados(conn, idempresa, situacao, vcto1, vcto2, 'todos', (1, 1))
     for titulo in titulos:
         print titulo
 
