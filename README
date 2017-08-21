@@ -1,4 +1,10 @@
 Dependências do projeto:
 
+  - bottle
+  - jinja2
   - wkhtmltopdf
+
+Instalação:
+
+Criar pasta Downloads com permissão de gravação.
 
