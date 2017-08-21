@@ -72,8 +72,8 @@ def cartas():
         conn,
         idempresa = idempresa,
         situacao  = situacoes[request.forms.get('situacao')],
-        vcto1     = datetime.strptime(data_inicial, '%d/%m/%Y'),
-        vcto2     = datetime.strptime(data_final, '%d/%m/%Y'),
+        vcto1     = datetime.strptime(data_inicial, '%d/%m/%Y').date(),
+        vcto2     = datetime.strptime(data_final, '%d/%m/%Y').date(),
         grupo     = grupo,
         qtde_boletos_vencidos = (qtde1, qtde2)
     )
