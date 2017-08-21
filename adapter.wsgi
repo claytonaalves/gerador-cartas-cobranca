@@ -1,7 +1,8 @@
 import sys
 import os
 import bottle
-sys.path = ['/var/www/appcartas/'] + sys.path
+sys.path = ['/var/www/gerador-cartas-cobranca/'] + sys.path
+
 os.chdir(os.path.dirname(__file__))
 
 os.environ['DB_HOST'] = "0.0.0.0"
